@@ -1,204 +1,140 @@
-﻿//var books = new List<Book.Book>
-//        {
-//            new Book.Book("The Catcher in the Rye", "J.D. Salinger"),
-//            new Book.Book("To Kill a Mockingbird", "Harper Lee"),
-//            new Book.Book("1984", "George Orwell"),
-//            new Book.Book("The Great Gatsby", "F. Scott Fitzgerald"),
-//            new Book.Book("1984", "Thomas Pynchon")
-//        };
-//books.Sort(new BookComparer.BookComparer());
-//Console.WriteLine("Books sorted by title and author:");
-//foreach (var book in books)
-//{
-//    Console.WriteLine($"{book.Title} by {book.Author}");
-//}
+﻿using Aerospike.Client;
+using System;
+using System.Collections;
+using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
 
-
-
-using System.Diagnostics;
-
-//class Program
-//{
-//    static void Main(string[] args)
-//    {
-//        Console.WriteLine("C# For Loop");
-//        int number = 10;
-//        for (int count = 0; count < number; count++)
-//        {
-//            //Thread.CurrentThread.ManagedThreadId returns an integer that 
-//            //represents a unique identifier for the current managed thread.
-//            Console.WriteLine($"value of count = {count}, thread = {Thread.CurrentThread.ManagedThreadId}");
-//            //Sleep the loop for 10 miliseconds
-//            Thread.Sleep(10);
-//        }
-//        Console.WriteLine();
-
-//        Console.WriteLine("Parallel For Loop");
-//        Parallel.For(0, number, count =>
-//        {
-//            Console.WriteLine($"value of count = {count}, thread = {Thread.CurrentThread.ManagedThreadId}");
-//            //Sleep the loop for 10 miliseconds
-//            Thread.Sleep(10);
-//        });
-//        Console.ReadLine();
-//    }
-//}
-////////////////////////////////////////////////////
-//class Program
-//{
-//    static void Main()
-//    {
-//        DateTime StartDateTime = DateTime.Now;
-//        Stopwatch stopWatch = new Stopwatch();
-//        Console.WriteLine("For Loop Execution start");
-//        stopWatch.Start();
-//        for (int i = 0; i < 10; i++)
-//        {
-//            long total = DoSomeIndependentTask();
-//            Console.WriteLine("{0} - {1}", i, total);
-//        }
-//        DateTime EndDateTime = DateTime.Now;
-//        Console.WriteLine("For Loop Execution end ");
-//        stopWatch.Stop();
-//        Console.WriteLine($"Time Taken to Execute the For Loop in miliseconds {stopWatch.ElapsedMilliseconds}");
-
-//        Console.ReadLine();
-//    }
-//    static long DoSomeIndependentTask()
-//    {
-//        //Do Some Time Consuming Task here
-//        //Most Probably some calculation or DB related activity
-//        long total = 0;
-//        for (int i = 1; i < 100000000; i++)
-//        {
-//            total += i;
-//        }
-//        return total;
-//    }
-//}
-/////////////////////////////////////////////////////////////
-//class Program
-//{
-//    static void Main()
-//    {
-//        DateTime StartDateTime = DateTime.Now;
-//        Stopwatch stopWatch = new Stopwatch();
-//        Console.WriteLine("Parallel For Loop Execution start");
-//        stopWatch.Start();
-
-//        Parallel.For(0, 10, i => {
-//            long total = DoSomeIndependentTask();
-//            Console.WriteLine("{0} - {1}", i, total);
-//        });
-//        DateTime EndDateTime = DateTime.Now;
-//        Console.WriteLine("Parallel For Loop Execution end ");
-//        stopWatch.Stop();
-//        Console.WriteLine($"Time Taken to Execute Parallel For Loop in miliseconds {stopWatch.ElapsedMilliseconds}");
-
-//        Console.ReadLine();
-//    }
-//    static long DoSomeIndependentTask()
-//    {
-//        //Do Some Time Consuming Task here
-//        //Most Probably some calculation or DB related activity
-//        long total = 0;
-//        for (int i = 1; i < 100000000; i++)
-//        {
-//            total += i;
-//        }
-//        return total;
-//    }
-//}
-//////////////////////////////////////////////Parallel Options/////////////////////////////////
-
-//class Program
-//{
-//    static void Main(string[] args)
-//    {
-//        //Limiting the maximum degree of parallelism to 2
-//        var options = new ParallelOptions()
-//        {
-//            MaxDegreeOfParallelism = 2
-//        };
-//        int n = 10;
-//        Parallel.For(0, n, options, i =>
-//        {
-//            Console.WriteLine(@"value of i = {0}, thread = {1}",
-//            i, Thread.CurrentThread.ManagedThreadId);
-//            Thread.Sleep(10);
-//        });
-//        Console.WriteLine("Press any key to exist");
-//        Console.ReadLine();
-//    }
-//}
-
-////////////////////////////////////Parallel Thread Termination////////////////
-//class Program
-//{
-//    static void Main()
-//    {
-//        var BreakSource = Enumerable.Range(0, 1000).ToList();
-//        int BreakData = 0;
-//        Console.WriteLine("Using loopstate Break Method");
-//        Parallel.For(0, BreakSource.Count, (i, BreakLoopState) =>
-//        {
-//            BreakData += i;
-//            if (BreakData > 100)
-//            {
-//                BreakLoopState.Break();
-//                Console.WriteLine("Break called iteration {0}. data = {1} ", i, BreakData);
-//            }
-//        });
-//        Console.WriteLine("Break called data = {0} ", BreakData);
-//        var StopSource = Enumerable.Range(0, 1000).ToList();
-//        int StopData = 0;
-//        Console.WriteLine("Using loopstate Stop Method");
-//        Parallel.For(0, StopSource.Count, (i, StopLoopState) =>
-//        {
-//            StopData += i;
-//            if (StopData > 100)
-//            {
-//                StopLoopState.Stop();
-//                Console.WriteLine("Stop called iteration {0}. data = {1} ", i, StopData);
-//            }
-//        });
-//        Console.WriteLine("Stop called data = {0} ", StopData);
-//        Console.ReadKey();
-//    }
-//}
-
-///////////////////////////////Parallel Foreach//////////////////////////////////////
-class Program
-{
-    static void Main()
+class Program {
+    static AerospikeClient client;
+    static void Main(string[] args)
     {
-        var BreakSource = Enumerable.Range(0, 1000).ToList();
-        int BreakData = 0;
-        Console.WriteLine("Using loopstate Break Method");
-        Parallel.For(0, BreakSource.Count, (i, BreakLoopState) =>
-        {
-            BreakData += i;
-            if (BreakData > 100)
-            {
-                BreakLoopState.Break();
-                Console.WriteLine("Break called iteration {0}. data = {1} ", i, BreakData);
-            }
-        });
-        Console.WriteLine("Break called data = {0} ", BreakData);
-        var StopSource = Enumerable.Range(0, 1000).ToList();
-        int StopData = 0;
-        Console.WriteLine("Using loopstate Stop Method");
-        Parallel.For(0, StopSource.Count, (i, StopLoopState) =>
-        {
-            StopData += i;
-            if (StopData > 100)
-            {
-                StopLoopState.Stop();
-                Console.WriteLine("Stop called iteration {0}. data = {1} ", i, StopData);
-            }
-        });
-        Console.WriteLine("Stop called data = {0} ", StopData);
-        Console.ReadKey();
+        //1.
+        client = new AerospikeClient("127.0.0.1",3000);
+        ////WritePolicy writePolicy = new WritePolicy();
+        ////writePolicy.expiration = 120;
+        //Key key = new Key("test", "demodef", "key10");
+        //client.Put(null, key, new Bin("mybinname","mybinvalue"));
+        ////client.Close();
+        //Console.WriteLine(client.Get(null, key));
+
+
+        //2. Complex Data Ob
+        //Dictionary<string, object> product = new();
+        //product.Add("name", "laptop"); 
+        //product.Add("productID", 123); 
+        //product.Add("available", true); 
+
+        //Bin productBin = new Bin("product",product);
+        //client.Put(null,key,productBin);
+
+        //Console.WriteLine(client.Get(null,key));
+
+        //Record record = client.Get(null, key);
+        //IDictionary item =  record.GetMap("product");
+
+        //foreach (var rec in item)
+        //{
+        //    Console.WriteLine(rec);
+        //}
+
+        //3. Multiple bins against one key
+        //Key myKey = new Key("test", "test_set1", 100012);
+        //Bin myBin = new Bin("description", "Couch");
+        //Bin mySecondBin = new Bin("price", 123.50);
+        //Bin myThirdBin = new Bin("weight", 12);
+        ////Write
+        //client.Put(null, myKey, myBin, mySecondBin, myThirdBin);
+        ////Read
+        ////Record record = client.Get(null, myKey);
+
+        ////Get the data
+        //Record record = client.Get(null, myKey,"price");
+        //Console.WriteLine(record);
+        //int currentGeneration = record.generation; //6
+        //Console.WriteLine(currentGeneration);
+
+        ////Modify the data
+        //Bin updatedBin = new Bin("price", 125.50);
+
+        ////4.Thread safe updates
+        ////Update the data
+        //WritePolicy writePolicy = new WritePolicy();
+        //writePolicy.generationPolicy = GenerationPolicy.EXPECT_GEN_EQUAL;
+        //writePolicy.generation = currentGeneration;
+
+        //client.Put(writePolicy, myKey, updatedBin);
+        //client.Close();
+
+        //5.Update(UPSERT) 
+        //WritePolicy writePolicy = new WritePolicy();
+        //writePolicy.recordExistsAction = RecordExistsAction.CREATE_ONLY;
+        Key myKey = new Key("test", "test_set1", 100013);
+        //Bin updatedBin = new Bin("price", 125.50);
+        //client.Delete(writePolicy,myKey);
+        //client.Put(writePolicy, myKey, updatedBin);
+
+        //6.TOUCH
+        //WritePolicy writePolicy = new WritePolicy();
+        //writePolicy.expiration = 120;
+
+        //client.Touch(writePolicy, myKey);
+
+        //Operations
+        Key key = new Key("test", "cart2", 1);
+        //client.Delete(null, key);
+        ////client.Put(null,key, new Bin ("shoes", 59.44),
+        ////                     new Bin("jeans", 59.44),
+        ////                     new Bin("shirts", 59.44));
+
+        //Console.WriteLine(addItem(key, "shoes", 59.44));
+        //Console.WriteLine(addItem(key, "jeans", 69.44));
+        //Console.WriteLine(addItem(key, "shirts", 79.44));
+
+        //
+
+        AddItem(client, key, CreateItem("shoes", 59.25, "/items/item1234"));
+        AddItem(client, key, CreateItem("jeans", 29.95, "/items/item2378"));
+        AddItem(client, key, CreateItem("shirt", 19.95, "/items/item88293"));
+
+        //Record record = client.Operate(null, key,
+        //  ListOperation.RemoveByIndex("items", 0, ListReturnType.NONE),
+        //  ListOperation.Size("items"));
+        //int remaining = record.GetInt("items");
+        //Console.WriteLine(remaining);
+
+        //Record record = client.Operate(null, key,
+        //ListOperation.RemoveByIndexRange("items", 0, 2, ListReturnType.COUNT));
+        //int remaining = record.GetInt("items");
+        //Console.WriteLine(remaining);
+
+
+        Record record = client.Operate(null, key,
+        ListOperation.RemoveByIndex("items", 1,
+        ListReturnType.INVERTED));
+        int removed = record.GetInt("items");
+        Console.WriteLine(removed);
+    }
+    //public static double addItem(Key key, string itemDcr, double cost) {
+    //    Record record = client.Operate(null, key,
+    //       Operation.Append(new Bin("items", itemDcr + ",")), //oprations within one transaction
+    //       Operation.Add(new Bin("totalItems", 1)),
+    //       Operation.Add(new Bin("cost", cost)));
+    //    Console.WriteLine(record);
+    //    return record.GetDouble("cost");
+    //}
+
+   
+
+    public static Dictionary<string, object> CreateItem(string itemDescr, double cost, string originalItem)
+    {
+        var result = new Dictionary<string, object>();
+        result["cost"] = cost;
+        result["descr"] = itemDescr;
+        result["orig"] = originalItem;
+        return result;
+    }
+    public static void AddItem(IAerospikeClient client, Key key, Dictionary<string, object> item)
+    {
+        client.Operate(null, key, ListOperation.Append("items", Value.Get(item)));
     }
 }
-
